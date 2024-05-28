@@ -261,3 +261,16 @@ b) Visualizzare il nome e cognome del ragazzo che ha partecipato al maggior
 numero di campi estivi per l’attività della categoria «Tennis».
 */
 
+WITH CTE1 AS (
+    SELECT CodFiscale, COUNT(DISTINCT A.CodAttività) AS numCampiEstivi
+    FROM ATTIVITA’ A, ISCRIZIONE_PER_ATTIVITA’_IN_CAMPO_ESTIVO T
+    WHERE A.CodAttività = T.CodAttività
+    AND A.Categoria = 'Tennis'
+    GROUP BY CodFiscale),
+CTE2 AS (
+    SELECT MAX(numCampiEstivi) AS MAXCAMPIESTIVI
+    FROM CTE1)
+SELECT R.Nome, R.Cognome
+FROM CTE1, RAGAZZO R, CTE2
+WHERE CTE1.CodFiscale = R.CodFiscale
+AND CTE1.numCampiEstivi = MAXCAMPIESTIVI;
