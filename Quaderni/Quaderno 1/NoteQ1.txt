@@ -1,0 +1,23 @@
+Si consideri che un utente può sottoscrivere più abbonamenti anche nello stesso momento, e che un utente può terminare e riattivare lo stesso abbonamento più volte in periodi diversi.ES. SOTTOSCRIVERE:
+(U1, A1, 22/3, 22/4)
+(U2, A2, 22/3, F2)
+(U1, A2, 15/4, F1)
+(U1, A1, 5/2, 5/3)
+(U1, A1, 15/3, 25/3)
+
+// U = Utente | A = Abbonamento | F_n = Data fine n
+Problema: U1 ha rinnovato l'abbonamento A1 (il 22/3) prima che terminasse (25/3)Domanda: posso non preoccuparmene perchè i dati inseriti nel DB sono corretti a priori?ES. ASSOCIAZIONE:
+(U1, D1, data1)
+(U1, D2, data1)
+(U2, D1, data1) // Due Utenti hanno associato lo stesso dispositivo
+
+// U = Utente | D = Dispositivo
+Domanda: La cardinalità (1,1) mi "protegge" dall'eventuale errore causato dall'associazione del D1 sia da U1 che da U2 in "ES ASSOCIAZIONE"?ES. VISUALIZZAZIONE
+(U1, TI1, TF1, D1, C1)
+(U1, TI1, TF1, D2, C1)
+(U2, TI1, TF1, D2, C3)
+
+// U = Utente | D = Dispositivo | TI = tempo inizio 
+// TF = tempo fine | C = contenuto
+// Pedici distinti =&gt; occorrenze distinte 
+Problema: In questo modo sia U1 che U2 possono utlizzare D2 anche contemporaneamente.Soluzione(?): tolgo l'utente come attributo poichè può essere derivato da dispositivo. Toglierei anche Cn dalla chiave.IPOTESIHo ipotizzato che un abbonamento dia diritto ad accedere ad almeno un contenuto;Ho ipotizzato che dato un contenuto vi si possa accede almeno con un abbonamento;Ho ipotizzato che dato un contenuto possano avere partecipato 0 attori (documentario);Ho ipotizzato che dato un dispositivo esso possa essere associato ad una e una sola persona ma che un utente possa avere associato più dispositivi;Ho ipotizzato che ad un dispositivo corrisponda un'unica data di associazione statica per quel dispositivo
