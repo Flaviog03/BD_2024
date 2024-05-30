@@ -10,10 +10,10 @@ su quel progetto.
 */
 
 SELECT D.Nome, D.Cognome, P.Titolo, P.Descrizione
-FROM VALUTAZIONE V
-JOIN DIPENDENTE D ON D.CodDipendente = V.CodDipendente
-JOIN PROGETTO P ON P.CodProgetto = V.CodProgetto
-WHERE V.Valutazione > (
+FROM VALUTAZIONE V, DIPENDENTE D, PROGETTO P
+WHERE D.CodDipendente = V.CodDipendente
+AND P.CodProgetto = V.CodProgetto
+AND V.Valutazione > (
     SELECT AVG(VAL.Valutazione)
     FROM VALUTAZIONE VAL
     WHERE VAL.CodProgetto = P.CodProgetto); -- Condizione di correlazione

@@ -10,13 +10,13 @@ la data dell'ordine e l'importo dell'ordine.
 */
 WITH ordiniPerCittà AS (
     SELECT Città, COUNT(O.CodNegozio, O.CodCliente) AS numeroOrdini
-    FROM ORDINE O
-    JOIN NEGOZIO N ON N.CodNegozio = O.CodNegozio
+    FROM ORDINE O, NEGOZIO N
+    WHERE N.CodNegozio = O.CodNegozio
     GROUP BY Città),
 SELECT N.NomeN, N.Città, C.NomeC, C.Cognome, O.Data, O.Importo
-FROM ORDINE O
-JOIN NEGOZIO N ON N.CodNegozio = O.CodNegozio
-JOIN CLIENTE C ON C.CodCliente = O.CodCliente
+FROM ORDINE O, NEGOZIO N, CLIENTE C
+WHERE C.CodCliente = O.CodCliente
+AND N.CodNegozio = O.CodNegozio
 GROUP BY N.CodNegozio, N.NomeN, N.Città, C.CodCliente, C.NomeC, C.Cognome, O.Data, O.Importo
 HAVING COUNT(O.CodNegozio, O.CodCliente) = (
     SELECT MAX(numeroOrdini)

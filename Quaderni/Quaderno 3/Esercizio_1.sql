@@ -8,11 +8,11 @@ di quel libro.
 
 -- Risultato finale
 SELECT A.Nome, A.Cognome, L.Titolo, L.Genere, P.NumeroCopie
-FROM AUTORI_LIBRO AL
-JOIN AUTORE A ON A.CodAutore = AL.CodAutore
-JOIN LIBRO L ON L.CodL = AL.CodL
-JOIN PUBBLICAZIONE P ON P.CodL = AL.CodL
-WHERE AL.CodA IN (
+FROM AUTORI_LIBRO AL, AUTORE A, LIBRO L, PUBBLICAZIONE P
+WHERE A.CodAutore = AL.CodAutore 
+AND L.CodL = AL.CodL
+AND P.CodL = AL.CodL
+AND AL.CodA IN (
     SELECT A.CodAutore  -- Selezionare ogni autore che ha pubblicato almeno 3 libri di genere 'Fantascienza'
     FROM AUTORI_LIBRO A
     JOIN LIBRO L ON L.CodLibro = A.CodLibro
