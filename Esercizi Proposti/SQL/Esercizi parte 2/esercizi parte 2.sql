@@ -274,3 +274,42 @@ SELECT R.Nome, R.Cognome
 FROM CTE1, RAGAZZO R, CTE2
 WHERE CTE1.CodFiscale = R.CodFiscale
 AND CTE1.numCampiEstivi = MAXCAMPIESTIVI;
+
+/*
+CLIENTE (Cod_Cli, Nome)
+CONTO (Cod_Conto, saldo, agenzia, stato)
+CONTO_CLIENTE(Cod_Conto, Cod_Cli)
+
+a) Trovare tutte le agenzie che hanno almeno un cliente titolare da solo (senza
+cointestatari) di un unico conto corrente (cliente a cui non è intestato nessun altro
+conto corrente).
+*/
+
+-- Approccio bizzarro
+WITH CTE1 AS (
+    SELECT Cod_Conto, Cod_Cli   -- Seleziono i conti con un unico intestatario
+    FROM CONTO_CLIENTE
+    GROUP BY Cod_Conto, Cod_Cli
+    HAVING COUNT(Cod_Cli) = 1;
+    INTERSECT                   -- Faccio l'intersezione tra i due 
+    SELECT Cod_Conto, Cod_Cli   -- Seleziono i clienti con un solo conto corrente
+    FROM CONTO_CLIENTE
+    GROUP BY Cod_Cli, Cod_Conto
+    HAVING COUNT(Cod_Conto) = 1)
+SELECT agenzia
+FROM CONTO C, CTE1
+WHERE C.Cod_Conto = CTE1.Cod_Conto;
+
+-- Approccio corretto
+SELECT DISTINCT C.Agenzia
+FROM CONTO C, CONTO-CLIENTE CL
+WHERE C.Cod-Conto = CL.Cod-Conto
+AND C.Cod-Conto IN (
+    SELECT CL2.Cod-Conto
+    FROM CONTO-CLIENTE CL2
+    GROUP BY CL2.Cod-Conto
+    HAVING COUNT (*) = 1)
+AND Cod-Cli IN (SELECT Cod-Cli
+    FROM CONTO-CLIENTE CL3
+    GROUP BY CL3.Cod-Cli
+    HAVING COUNT (*) = 1);
