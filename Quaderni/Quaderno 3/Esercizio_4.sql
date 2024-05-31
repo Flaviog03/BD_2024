@@ -91,12 +91,10 @@ IF (nDateDisponibili < > 0) THEN
     WHERE I.Targa = P.Targa AND C.TipoIntervento = I.TipoIntervento
     AND C.Marca = :NEW.Marca AND C.Modello = :NEW.Modello AND I.Targa = :NEW.Targa;
 
-    NOTIFICA_INFO_TAGLIANDO(*CodR, Targa, DataTagliando, OrarioApertura, OrarioChiusura, CostoTotale)
     INSERT INTO NOTIFICA_INFO_TAGLIANDO(CodR, Targa, DataTagliando, OrarioApertura, OrarioChiusura, CostoTotale)
     VALUES (:NEW.CodR, :NEW.Targa, DataPrenotazione, OA, OC, costoTot);
 
 ELSE
-    DELETE FROM PRENOTAZIONE_TAGLIANDO
-    WHERE CodR = :NEW.CodR;
+    raise_application_error(xxx, 'Impossibile prenotare');  -- xxx è il numero dell'errore 
 END IF;
 END;
