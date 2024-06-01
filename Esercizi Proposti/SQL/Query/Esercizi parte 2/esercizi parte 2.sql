@@ -313,3 +313,58 @@ AND Cod-Cli IN (SELECT Cod-Cli
     FROM CONTO-CLIENTE CL3
     GROUP BY CL3.Cod-Cli
     HAVING COUNT (*) = 1);
+
+/*
+ESERCIZIO 6
+
+CONTRIBUENTE (*CodFiscale, Nome, Via, Città)
+DICHIARAZIONE (*CodDichiarazione, Tipo, Reddito)
+PRESENTA (*CodFiscale, *CodDichiarazione, Data)
+
+Visualizzare codice, nome e media dei redditi dichiarati dal 1990 in poi per i
+contribuenti tali che il massimo reddito |da loro dichiarato| dal 1990 in poi sia
+superiore alla media dei redditi calcolata su tutte le dichiarazioni nel database.
+*/
+
+WITH CONTRIBUENTE_AVGREDDITO AS (
+    SELECT C.CodFiscale, C.Nome, AVG(D.Reddito) AS mediaRedditi, MAX(D.Reddito) AS massimoReddito
+    FROM CONTRIBUENTE C, DICHIARAZIONE D, PRESENTA P
+    WHERE P.CodFiscale = C.CodFiscale
+    AND P.CodDichiarazione = D.CodDichiarazione
+    AND P.Data >= '01/01/1990'
+    GROUP BY C.CodFiscale, C.Nome),
+SELECT CTE1.CodFiscale, CTE1.Nome, CTE1.mediaRedditi
+FROM CONTRIBUENTE_AVGREDDITO CTE1
+WHERE massimoReddito > (
+    SELECT AVG(D.Reddito)
+    FROM DICHIARAZIONE);
+
+-- Soluzione Corretta
+SELECT C.CodFiscale, C.Nome, AVG(D.Reddito) AS mediaRedditi
+FROM CONTRIBUENTE C, DICHIARAZIONE D, PRESENTA P
+WHERE P.CodFiscale = C.CodFiscale
+AND P.CodDichiarazione = D.CodDichiarazione
+AND P.Data >= '01/01/1990'
+GROUP BY C.CodFiscale, C.Nome
+HAVING MAX(D.Reddito) > (
+    SELECT AVG(D.Reddito)
+    FROM DICHIARAZIONE);
+
+/*
+ESERCIZIO 7
+
+PERSONA (*Nome, Sesso, Età)
+GENITORE (*Nome_Gen, Nome_Figlio)
+
+a) Trovare il nome di tutte le persone con età inferiore a 10 anni che sono figli unici.
+*/
+
+SELECT P.Nome
+FROM PERSONA P, GENITORE G
+WHERE P.Nome = G.Nome_Figlio
+AND P.Età < 10
+AND G.Nome_Gen NOT IN (
+    SELECT Nome_Gen
+    FROM GENITORE
+    GROUP BY Nome_Gen
+    HAVING COUNT(*) > 1); -- Se hanno più di una tupla => più di un figlio
