@@ -1,0 +1,10 @@
+/*
+STUDENTE(*Matricola, NomeStudente, AnnoImmatricolazione, CorsoLaurea)
+CORSO(*CodCorso, NomeCorso, NumeroCrediti)
+ESAMI_SOSTENUTI(*CodCorso, *Matricola, *Data, Voto)
+GRADUATORIA_STUDENTI(*Matricola, Punteggio)
+BORSE_STUDIO_ASSEGNATE(*CodBorsa, $Matricola, NumeroOre)
+DOMANDA_INSERIMENTO_GRADUATORIA(*Matricola, DataDomanda)
+OFFERTA_BORSA_STUDIO(*CodBorsa, $CodCorso, NumeroOre)
+NOTIFICA_INFORMAZIONI(*CodN, $CodBorsa, $Matricola*, Messaggio)
+*/

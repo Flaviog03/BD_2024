@@ -1,0 +1,82 @@
+/*
+PERSONA (*Matricola, Mansione)
+TIPO_TURNO (*CodT, OraInizio, Durata)
+TURNO (*Matricola, *Data, CodT)
+NOTIFICA (*Matricola, *Data, EsitoRichiesta)
+RICHIESTA_FERIE(*CodR, $Matricola, Data)
+
+Scrivere il trigger per gestire le richieste di un giorno di ferie da parte delle persone che
+lavorano in un ospedale (inserimento nella tabella RICHIESTA_FERIE).
+
+La richiesta di ferie viene accettata se la persona che la inoltra non è di turno nel giorno
+di ferie richiesto (tabella TURNO).
+
+Altrimenti, se la persona è di turno in quel giorno, la richiesta di ferie è accettata solo
+se esiste un'altra persona che può sostituirla per il turno.
+In caso contrario, la richiesta di ferie viene respinta.
+Una persona può sostituire un 'altra persona per un turno in un certo giorno se ha la
+stessa mansione della persona che deve sostituire, e non è già di turno in quel giorno.
+
+Deve essere notificato l'esito della richiesta (accettata o respinta) mediante un inserimento
+nella tabella NOTIFICA_TURNO.
+
+EVENTO:
+    - Inserimento nella tabella RICHIESTA_FERIE (Tabella Mutante);
+CONDIZIONE:
+    - Nessuna;
+MODALITÀ:
+    - Immediata;
+    - AFTER;
+GRANULARITÀ:
+    - Di Tupla;
+AZIONE:
+    - Controllo se possibile mandarlo in ferie
+    - Se nel giorno richiesto non è di turno => richiesta accettata
+    - Se nel giorno richiesto è di turno
+        - Se esiste un altra persona con la stessa mansione che non è di turno nella data richiesta => accettata
+        - Respinta
+*/
+
+CREATE OR REPLACE TRIGGER gestione_richiesta_ferie
+AFTER INSERT ON RICHIESTA_FERIE
+FOR EACH ROW
+DECLARE 
+    N NUMBER;
+    esito VARCHAR(30);
+BEGIN
+    -- conto le tuple della tabella "Turno" in cui Matricola = :NEW.Matricola e Data = :NEW.Data
+    SELECT COUNT(*) INTO N
+    FROM TURNO
+    WHERE Matricola = :NEW.Matricola
+    AND Data = :NEW.Data;
+
+    IF(N = 0) THEN
+        -- Significa che l'utente non è di turno nella data richiesta
+        esito := 'Accettata'
+    ELSE
+        -- Cerco se esistono utenti con la stessa mansione della persona che deve sostituire,
+        -- ma non sono già di turno in quel giorno
+        SELECT COUNT(*) INTO N
+        FROM PERSONE
+        WHERE Mansione = (
+            SELECT Mansione
+            FROM PERSONA
+            WHERE Matricola = :NEW.Matricola)
+        AND Matricola NOT IN (
+            SELECT Matricola
+            FROM TURNO
+            WHERE Data = :NEW.Data);
+
+        IF(N = 0) THEN
+            -- Significa che non vi è nessun utente in grado di sostituire il richiedente nella data richiesta
+            esito := 'Respinta';
+        ELSE
+            -- Significa che c'è almeno un utente non di turno
+            esito := 'Accettata';
+        END IF;
+    END IF;
+
+    -- Notifica esito
+    INSERT INTO NOTIFICA(Matricola, Data, EsitoRichiesta)
+    VALUES (:NEW.Matricola, :NEW.Data, esito);
+END;
